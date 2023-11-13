@@ -1,11 +1,13 @@
-# cs144-computer-networking
-
 #### Important!
 
 this is the 2019 version of stanford cs144 lab.
 
-and this brunch `main` only for lab0-sponge start code.
+and this branch `main` **only for lab0**-sponge start code.
 
-my solutions are in brunch `solution`
+my solutions are in brunch `solution`.
 
-for more versions abount sponge, view [sponge](https://gitee.com/kangyupl/sponge/tree/master)
+For more start code versions abount sponge from lab1 to lab7, go to [sponge](https://gitee.com/kangyupl/sponge/tree/master) and switch the branch to get.
+
+and you can find the image 2019 version of course site [here](https://www.cnblogs.com/kangyupl/p/stanford_cs144_labs.html)
+
+thanks for kangyu.
