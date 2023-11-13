@@ -23,3 +23,10 @@ Updating:
 - [ ] lab4
 - [ ] lab5
 - [ ] lab7
+
+
+## More details
+
+i use `doxygen` to generate comments.
+
+for debug u can view the code in `tests/`
