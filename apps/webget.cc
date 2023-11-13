@@ -17,19 +17,8 @@ void get_URL(const string &host, const string &path) {
     // (not just one call to read() -- everything) until you reach
     // the "eof" (end of file).
 
-    TCPSocket socket = TCPSocket();
-    socket.connect(Address(host, "http"));
-    socket.write("GET " + path + " HTTP/1.1\r\n");
-    socket.write("HOST: " + host + "\r\n");
-    socket.write("Connection: close\r\n\r\n");
-    while (!socket.eof()) {
-        string buffer;
-        socket.read(buffer);
-        cout << buffer;
-    }
-    socket.close();
-    // cerr << "Function called: get_URL(" << host << ", " << path << ").\n";
-    // cerr << "Warning: get_URL() has not been implemented yet.\n";
+    cerr << "Function called: get_URL(" << host << ", " << path << ").\n";
+    cerr << "Warning: get_URL() has not been implemented yet.\n";
 }
 
 int main(int argc, char *argv[]) {
