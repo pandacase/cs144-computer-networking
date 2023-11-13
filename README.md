@@ -2,7 +2,7 @@
 
 cs144 2019-version lab.
 
-solutions are all in `apps/` and `libsponge/`.
+solutions are all in `apps/` and `libsponge/`, and excepet for these two direcotory i didn't update the rest(such as `tests` which containing the source code of tester)
 
 Updating:
 - [x] lab0
