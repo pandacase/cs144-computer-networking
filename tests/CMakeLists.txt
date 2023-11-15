@@ -6,8 +6,6 @@ macro (add_test_exec exec_name)
     target_link_libraries ("${exec_name}" sponge ${ARGN})
 endmacro (add_test_exec)
 
-<<<<<<< Updated upstream
-=======
 add_test_exec (tcp_parser ${LIBPCAP})
 add_test_exec (fsm_stream_reassembler_cap)
 add_test_exec (fsm_stream_reassembler_single)
@@ -20,7 +18,6 @@ add_test_exec (fsm_stream_reassembler_win)
 add_test_exec (wrapping_integers_cmp)
 add_test_exec (wrapping_integers_unwrap)
 add_test_exec (wrapping_integers_wrap)
->>>>>>> Stashed changes
 add_test_exec (byte_stream_construction)
 add_test_exec (byte_stream_one_write)
 add_test_exec (byte_stream_two_writes)
