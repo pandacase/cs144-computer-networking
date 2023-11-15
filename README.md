@@ -14,7 +14,7 @@
 
 ## Why 2019?
 
-From csdiy I found that most of the reference info is about `sponge`, which is the 2019 version of this lab.
+From [csdiy](https://csdiy.wiki/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/CS144/) I found that most of the reference info is about `sponge`, which is the 2019 version of this lab.
 
 So it is more easy to solve the envir problem when i choose this version as the project.
 
