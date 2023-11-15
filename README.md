@@ -1,6 +1,6 @@
 ## Important!
 
-📅 This is the 2019 version of stanford cs144 lab.
+📅 This is the **2019 version** of stanford cs144 lab.
 
 ⭐ The offical latest site : [cs144](https://cs144.github.io/)
 
