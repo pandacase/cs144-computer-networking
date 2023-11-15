@@ -66,5 +66,3 @@ struct TCPHeader {
 };
 
 #endif  // SPONGE_LIBSPONGE_TCP_HEADER_HH
-
-

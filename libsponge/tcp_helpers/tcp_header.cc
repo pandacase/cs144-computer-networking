@@ -40,7 +40,7 @@ ParseResult TCPHeader::parse(NetParser &p) {
     // skip any options or anything extra in the header
     p.remove_prefix(doff * 4 - TCPHeader::LENGTH);
 
-    if (p .error()) {
+    if (p.error()) {
         return p.get_error();
     }
 
