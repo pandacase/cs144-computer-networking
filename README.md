@@ -30,15 +30,15 @@ Updating:
   - add `libsponge/byte_stream.hh`
   - add `libsponge/byte_stream.cc`
 - [x] lab1
-  - add `stream_reassembler.hh`
-  - add `stream_reassembler.cc`
+  - add `libsponge/stream_reassembler.hh`
+  - add `libsponge/stream_reassembler.cc`
 - [x] lab2
-  - add `tcp_receiver.hh`
-  - add `tcp_receiver.cc`
-  - update `stream_reassembler.hh`
-  - update `stream_reassembler.cc`
-  - add `wrapping_integers.hh`
-  - add `wrapping_integers.cc`
+  - add `libsponge/tcp_receiver.hh`
+  - add `libsponge/tcp_receiver.cc`
+  - update `libsponge/stream_reassembler.hh`
+  - update `libsponge/stream_reassembler.cc`
+  - add `libsponge/wrapping_integers.hh`
+  - add `libsponge/wrapping_integers.cc`
 - [ ] lab3
 - [ ] lab4
 - [ ] lab5
