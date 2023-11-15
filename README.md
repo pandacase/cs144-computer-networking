@@ -1,25 +1,28 @@
 ## Important!
 
-this is the 2019 version of stanford cs144 lab.
+📅 This is the 2019 version of stanford cs144 lab.
 
-and this branch `main` **only for lab0**-sponge start code.
+⭐ The offical latest site : [cs144](https://cs144.github.io/)
 
-my solutions are in branch `solution`.
+🔎 My solutions are in branch `solution`.
 
-For more start code versions abount sponge from lab1 to lab6, go to [sponge](https://gitee.com/kangyupl/sponge/tree/master) and switch the branch to get.
+🍪 Brach main for lab0, and the other is for the rest.
 
-and you can find the image of 2019-version course site [here](https://www.cnblogs.com/kangyupl/p/stanford_cs144_labs.html)
+👉 And you can find the image of 2019-version course site [here](https://www.cnblogs.com/kangyupl/p/stanford_cs144_labs.html)
 
-thanks for kangyu.
+😙  thanks for kangyu, and thanks for cs144.
 
+## Why 2019?
+
+From csdiy I found that most of the reference info is about `sponge`, which is the 2019 version of this lab.
+
+So it is more easy to solve the envir problem when i choose this version as the project.
+
+And also most of the solution on the internet is about `sponge` _(But...anyway, just try to finsh the challenge completely by yourself.)_
 
 ## About solution
 
-cs144 2019-version lab.
-
-solutions are all in `apps/` and `libsponge/`, 
-
-and excepet for these two direcotory i didn't update the rest.
+solutions are all in `apps/` and `libsponge/`
 
 Updating:
 - [x] lab0
@@ -41,9 +44,8 @@ Updating:
 - [ ] lab5
 - [ ] lab7
 
-
 ## More details
 
-i use `doxygen` to generate comments.
+- i use `doxygen` to generate comments.
 
-for debug u can view the code in `tests/`
+- for debug u can view the source code in `tests/`
