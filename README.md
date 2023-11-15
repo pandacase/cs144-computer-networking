@@ -2,7 +2,7 @@
 
 📅 This is the **2019 version** of stanford cs144 lab.
 
-⭐ The offical latest site : [cs144](https://cs144.github.io/)
+⭐ The latest offical site : [cs144](https://cs144.github.io/)
 
 🔎 My solutions are in branch `solution`.
 
