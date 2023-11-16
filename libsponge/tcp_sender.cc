@@ -9,6 +9,15 @@
 // For Lab 3, please replace with a real implementation that passes the
 // automated checks run by `make check_lab3`.
 
+// It will be your TCPSender’s responsibility to:
+// • Keep track of the receiver’s window (processing incoming acknos and window sizes)
+// • Fill the window when possible, by reading from the ByteStream, creating new TCP
+// segments (including SYN and FIN flags if needed), and sending them
+// • Keep track of which segments have been sent but not yet acknowledged by the receiver—
+// we call these “outstanding” segments
+// • Re-send outstanding segments if enough time passes since they were sent, and they
+// haven’t been acknowledged yet
+
 template <typename... Targs>
 void DUMMY_CODE(Targs &&... /* unused */) {}
 
@@ -37,8 +46,12 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
 }
 
 //! \param[in] ms_since_last_tick the number of milliseconds since the last call to this method
-void TCPSender::tick(const size_t ms_since_last_tick) { DUMMY_CODE(ms_since_last_tick); }
+void TCPSender::tick(const size_t ms_since_last_tick) { 
+    DUMMY_CODE(ms_since_last_tick); 
+}
 
 unsigned int TCPSender::consecutive_retransmissions() const { return {}; }
 
-void TCPSender::send_empty_segment() {}
+void TCPSender::send_empty_segment() {
+    
+}
