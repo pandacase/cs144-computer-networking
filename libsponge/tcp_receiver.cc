@@ -69,7 +69,7 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
         _reassembler.push_substring(string(""), checkpoint, true);
         return true;
     } else {
-        return false;   
+        return false;
     }
 }
 
