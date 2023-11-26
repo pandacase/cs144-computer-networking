@@ -31,23 +31,35 @@ TCPSender::TCPSender(const size_t capacity, const uint16_t retx_timeout, const s
     , _initial_retransmission_timeout{retx_timeout}
     , _stream(capacity) {}
 
-uint64_t TCPSender::bytes_in_flight() const { return {}; }
+uint64_t TCPSender::bytes_in_flight() const { return {_bytes_in_flight}; }
 
 void TCPSender::fill_window() {
+    TCPSegment seg = TCPSegment();
     
+    if (_next_seqno == 0) {
+        seg.header().syn = true;
+    } else if (_stream.input_ended()) {
+        seg.header().fin = true;
+    }
+
+    seg.header().seqno = wrap(_next_seqno, _isn);
+
+
+    // sent the segment
+    _segments_out.push(seg);
 }
 
 //! \param ackno The remote receiver's ackno (acknowledgment number)
 //! \param window_size The remote receiver's advertised window size
 //! \returns `false` if the ackno appears invalid (acknowledges something the TCPSender hasn't sent yet)
 bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_size) {
-    DUMMY_CODE(ackno, window_size);
+    
     return {};
 }
 
 //! \param[in] ms_since_last_tick the number of milliseconds since the last call to this method
 void TCPSender::tick(const size_t ms_since_last_tick) { 
-    DUMMY_CODE(ms_since_last_tick); 
+    
 }
 
 unsigned int TCPSender::consecutive_retransmissions() const { return {}; }
