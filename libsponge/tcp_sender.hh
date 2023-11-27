@@ -34,6 +34,7 @@ class TCPSender {
     unsigned int _consecutive_retransmission{0};
     uint64_t _acked{0}; //!< the ack number receive from receiver currently
     uint16_t _receiver_window_size{0};
+    uint64_t _seqno_with_fin{0};
 
   public:
     //! Initialize a TCPSender
