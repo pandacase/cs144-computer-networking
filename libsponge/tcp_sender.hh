@@ -18,27 +18,18 @@
 //! segments if the retransmission timer expires.
 class TCPSender {
   private:
-    //! our initial sequence number, the number for our SYN.
-    WrappingInt32 _isn;
-
-    //! outbound queue of segments that the TCPSender wants sent
-    std::queue<TCPSegment> _segments_out{};
-
-    //! retransmission timer for the connection
-    unsigned int _initial_retransmission_timeout;
-
-    //! outgoing stream of bytes that have not yet been sent
-    ByteStream _stream;
-
-    //! the (absolute) sequence number for the next byte to be sent
-    uint64_t _next_seqno{0};
+    WrappingInt32 _isn; //!< our initial sequence number, the number for our SYN.
+    std::queue<TCPSegment> _segments_out{}; //!< outbound queue of segments that the TCPSender wants sent
+    unsigned int _initial_retransmission_timeout; //!< retransmission timer for the connection
+    ByteStream _stream; //!< outgoing stream of bytes that have not yet been sent
+    uint64_t _next_seqno{0}; //!< the (absolute) sequence number for the next byte to be sent
 
     //! add some private variable here:
     std::map<uint64_t, TCPSegment> _segments_in_flight{}; 
     uint64_t _bytes_in_flight{0};
     
     unsigned int _current_retransmission_timeout;
-    bool _timer_on{false};
+    bool _timer_on{false};  //!< the switch indicating if the timer is on
     unsigned int _timer{0}; //!< the timer recording if the previous segment expires
     unsigned int _consecutive_retransmission{0};
     uint64_t _acked{0}; //!< the ack number receive from receiver currently
