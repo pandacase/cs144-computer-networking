@@ -4,7 +4,7 @@
 
 ⭐ The latest offical site : [cs144](https://cs144.github.io/)
 
-🔎 My solutions are in branch `solution`.
+🔎 My solution is in branch `solution`.
 
 🍪 Brach main for lab0, and the other is for the rest.
 
