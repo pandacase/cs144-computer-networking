@@ -41,6 +41,8 @@ void TCPSender::fill_window() {
     // sent the SYN
     if (_next_seqno == 0) {
         seg.header().syn = true;
+        seg.header().seqno = wrap(_next_seqno, _isn);
+
         _segments_out.push(seg);
         _segments_in_flight[_next_seqno] = seg;
         _bytes_in_flight += 1;
