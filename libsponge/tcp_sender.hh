@@ -38,6 +38,7 @@ class TCPSender {
     uint64_t _bytes_in_flight{0};
     
     unsigned int _current_retransmission_timeout;
+    bool _timer_on{false};
     unsigned int _timer{0}; //!< the timer recording if the previous segment expires
     unsigned int _consecutive_retransmission{0};
     uint64_t _acked{0}; //!< the ack number receive from receiver currently

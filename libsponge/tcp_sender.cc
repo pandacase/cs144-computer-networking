@@ -39,7 +39,8 @@ void TCPSender::fill_window() {
     
     if (_next_seqno == 0) {
         seg.header().syn = true;
-    } else if (_stream.input_ended()) {
+        _timer_on = true;
+    } else if (_stream.input_ended()) { // !!!
         seg.header().fin = true;
     }
 
@@ -58,29 +59,44 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
     if (absolute_ackno >= _next_seqno) {
         return {false};
     }
-
     
+    if (absolute_ackno >= _acked) {
+        _acked = absolute_ackno;
+        _receiver_window_size = window_size;
+        
+
+        // set the RTO back to initial value
+        _current_retransmission_timeout = _initial_retransmission_timeout;
+        // restart the timer
+        if (!_segments_in_flight.empty()) {
+            _timer = 0;
+        } 
+        // reset the consecutive retransmission
+        _consecutive_retransmission = 0;
+    }
 
     return {true};
 }
 
 //! \param[in] ms_since_last_tick the number of milliseconds since the last call to this method
 void TCPSender::tick(const size_t ms_since_last_tick) { 
-    // increase the timer
-    _timer += ms_since_last_tick;
-    
-    // check if time out
-    if (_timer > _current_retransmission_timeout) { 
-        // retransmission
+    if (_timer_on) {
+        // increase the timer
+        _timer += ms_since_last_tick;
+        
+        // check if time out
+        if (_timer > _current_retransmission_timeout) { 
+            // retransmission
 
 
-        if (_receiver_window_size != 0) {
-            // keep track of the number of consecutive retransmissions:
-            _consecutive_retransmission += 1;
-            // Double the RTO:
-            _current_retransmission_timeout *= 2;
-            // start the retransmission timer:
-            _timer = 0;
+            if (_receiver_window_size != 0) {
+                // keep track of the number of consecutive retransmissions:
+                _consecutive_retransmission += 1;
+                // Double the RTO:
+                _current_retransmission_timeout *= 2;
+                // start the retransmission timer:
+                _timer = 0;
+            }
         }
     }
 }
