@@ -47,6 +47,7 @@ void TCPSender::fill_window() {
         _segments_in_flight[_next_seqno] = seg;
         _bytes_in_flight += 1;
         _next_seqno += 1;
+        _receiver_window_size -= 1;
         _timer_on = true;
         return;
     }
@@ -63,14 +64,16 @@ void TCPSender::fill_window() {
         // fill the payload
         string str_to_send = _stream.read(payload_length_to_send);
         seg.payload() = move(str_to_send);
+        size_t length_to_send = payload_length_to_send + (seg.header().fin ? 1 : 0);
         // sent the segment
         _segments_out.push(seg);
         // tag that this segment is in flight
         _segments_in_flight[_next_seqno] = seg;
-        _bytes_in_flight += payload_length_to_send + seg.header().fin ? 1 : 0;
-        // update the next byte to be sent
-        _next_seqno += payload_length_to_send + seg.header().fin ? 1 : 0;
-        // trun of the timer
+        _bytes_in_flight += length_to_send;
+        // update the next byte to be sent and the window size
+        _next_seqno += length_to_send;
+        _receiver_window_size -= length_to_send;
+        // trun on the timer
         _timer_on = true;
     }
 }
@@ -80,7 +83,7 @@ void TCPSender::fill_window() {
 //! \returns `false` if the ackno appears invalid (acknowledges something the TCPSender hasn't sent yet)
 bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_size) {
     uint64_t absolute_ackno = unwrap(ackno, _isn, _acked);
-    if (absolute_ackno >= _next_seqno) {
+    if (absolute_ackno > _next_seqno) {
         return {false};
     }
     
@@ -97,7 +100,6 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
             } else {
                 break;
             }
-            it++;
         }
 
         // set the RTO back to initial value
@@ -123,7 +125,7 @@ void TCPSender::tick(const size_t ms_since_last_tick) {
         _timer += ms_since_last_tick;
         
         // check if time out
-        if (_timer > _current_retransmission_timeout) { 
+        if (_timer >= _current_retransmission_timeout) { 
             // retransmission
             if (!_segments_in_flight.empty()) {
                 auto first_segment = _segments_in_flight.begin();
