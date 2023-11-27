@@ -41,30 +41,36 @@ void TCPSender::fill_window() {
     // sent the SYN
     if (_next_seqno == 0) {
         seg.header().syn = true;
-        _timer_on = true;
         _segments_out.push(seg);
         _segments_in_flight[_next_seqno] = seg;
         _bytes_in_flight += 1;
         _next_seqno += 1;
+        _timer_on = true;
         return;
     }
 
-    // construct the segment to be sent
+    // construct the segment and send
     seg.header().seqno = wrap(_next_seqno, _isn);
     size_t payload_length_to_send = min(TCPConfig::MAX_PAYLOAD_SIZE, size_t(_receiver_window_size));
     if (_stream.input_ended() && payload_length_to_send >= _stream.buffer_size()) {
         seg.header().fin = true;
+        _seqno_with_fin = _next_seqno;
     }
     payload_length_to_send = min(payload_length_to_send, _stream.buffer_size());
-    string str_to_send = _stream.read(payload_length_to_send);
-    seg.payload() = move(str_to_send);
-    // sent the segment
-    _segments_out.push(seg);
-    // tag that this segment is in flight
-    _segments_in_flight[_next_seqno] = seg;
-    _bytes_in_flight += payload_length_to_send + seg.header().fin ? 1 : 0;
-    // update the next byte to be sent
-    _next_seqno += payload_length_to_send + seg.header().fin ? 1 : 0;
+    if (payload_length_to_send != 0) {
+        // fill the payload
+        string str_to_send = _stream.read(payload_length_to_send);
+        seg.payload() = move(str_to_send);
+        // sent the segment
+        _segments_out.push(seg);
+        // tag that this segment is in flight
+        _segments_in_flight[_next_seqno] = seg;
+        _bytes_in_flight += payload_length_to_send + seg.header().fin ? 1 : 0;
+        // update the next byte to be sent
+        _next_seqno += payload_length_to_send + seg.header().fin ? 1 : 0;
+        // trun of the timer
+        _timer_on = true;
+    }
 }
 
 //! \param ackno The remote receiver's ackno (acknowledgment number)
@@ -79,14 +85,28 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
     if (absolute_ackno >= _acked) {
         _acked = absolute_ackno;
         _receiver_window_size = window_size;
-
+        // update the segments in flight
+        auto it = _segments_in_flight.begin();
+        while(it != _segments_in_flight.end()) {
+            if (it->first < absolute_ackno) {
+                // removed from the segments in flight
+                _bytes_in_flight -= it->second.length_in_sequence_space();
+                it = _segments_in_flight.erase(it);
+            } else {
+                break;
+            }
+            it++;
+        }
 
         // set the RTO back to initial value
         _current_retransmission_timeout = _initial_retransmission_timeout;
         // restart the timer
+        _timer = 0;
         if (!_segments_in_flight.empty()) {
-            _timer = 0;
-        } 
+            _timer_on = true;
+        } else {
+            _timer_on = false;
+        }
         // reset the consecutive retransmission
         _consecutive_retransmission = 0;
     }
