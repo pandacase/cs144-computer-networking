@@ -48,4 +48,4 @@ Updating:
 
 - i use `doxygen` to generate comments.
 
-- for debug u can view the source code in `tests/`
+- for debugging u can view the source code in `tests/`
