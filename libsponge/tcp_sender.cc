@@ -3,6 +3,7 @@
 #include "tcp_config.hh"
 
 #include <random>
+#include <algorithm>
 
 // Dummy implementation of a TCP sender
 
@@ -37,18 +38,33 @@ uint64_t TCPSender::bytes_in_flight() const { return {_bytes_in_flight}; }
 void TCPSender::fill_window() {
     TCPSegment seg = TCPSegment();
     
+    // sent the SYN
     if (_next_seqno == 0) {
         seg.header().syn = true;
         _timer_on = true;
         _segments_out.push(seg);
+        _segments_in_flight[_next_seqno] = seg;
+        _bytes_in_flight += 1;
+        _next_seqno += 1;
         return;
     }
 
+    // construct the segment to be sent
     seg.header().seqno = wrap(_next_seqno, _isn);
-    
-
+    size_t payload_length_to_send = min(TCPConfig::MAX_PAYLOAD_SIZE, size_t(_receiver_window_size));
+    if (_stream.input_ended() && payload_length_to_send >= _stream.buffer_size()) {
+        seg.header().fin = true;
+    }
+    payload_length_to_send = min(payload_length_to_send, _stream.buffer_size());
+    string str_to_send = _stream.read(payload_length_to_send);
+    seg.payload() = move(str_to_send);
     // sent the segment
     _segments_out.push(seg);
+    // tag that this segment is in flight
+    _segments_in_flight[_next_seqno] = seg;
+    _bytes_in_flight += payload_length_to_send + seg.header().fin ? 1 : 0;
+    // update the next byte to be sent
+    _next_seqno += payload_length_to_send + seg.header().fin ? 1 : 0;
 }
 
 //! \param ackno The remote receiver's ackno (acknowledgment number)
