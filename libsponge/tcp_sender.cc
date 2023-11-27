@@ -40,12 +40,12 @@ void TCPSender::fill_window() {
     if (_next_seqno == 0) {
         seg.header().syn = true;
         _timer_on = true;
-    } else if (_stream.input_ended()) { // !!!
-        seg.header().fin = true;
+        _segments_out.push(seg);
+        return;
     }
 
     seg.header().seqno = wrap(_next_seqno, _isn);
-
+    
 
     // sent the segment
     _segments_out.push(seg);
@@ -63,7 +63,7 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
     if (absolute_ackno >= _acked) {
         _acked = absolute_ackno;
         _receiver_window_size = window_size;
-        
+
 
         // set the RTO back to initial value
         _current_retransmission_timeout = _initial_retransmission_timeout;
@@ -87,7 +87,10 @@ void TCPSender::tick(const size_t ms_since_last_tick) {
         // check if time out
         if (_timer > _current_retransmission_timeout) { 
             // retransmission
-
+            if (!_segments_in_flight.empty()) {
+                auto first_segment = _segments_in_flight.begin();
+                _segments_out.push(first_segment->second);
+            }
 
             if (_receiver_window_size != 0) {
                 // keep track of the number of consecutive retransmissions:
