@@ -38,33 +38,27 @@ uint64_t TCPSender::bytes_in_flight() const { return {_bytes_in_flight}; }
 void TCPSender::fill_window() {
     TCPSegment seg = TCPSegment();
     
-    // sent the SYN
+    // Construct the segment
+    seg.header().seqno = wrap(_next_seqno, _isn);
+    // - set the syn
     if (_next_seqno == 0) {
         seg.header().syn = true;
-        seg.header().seqno = wrap(_next_seqno, _isn);
 
-        _segments_out.push(seg);
-        _segments_in_flight[_next_seqno] = seg;
-        _bytes_in_flight += 1;
-        _next_seqno += 1;
-        _receiver_window_size -= 1;
-        _timer_on = true;
-        return;
     }
-
-    // construct the segment and send
-    seg.header().seqno = wrap(_next_seqno, _isn);
     size_t payload_length_to_send = min(TCPConfig::MAX_PAYLOAD_SIZE, size_t(_receiver_window_size));
-    if (_stream.input_ended() && payload_length_to_send >= _stream.buffer_size()) {
+    // - set the fin
+    if (_stream.eof() && payload_length_to_send >= _stream.buffer_size()) {
         seg.header().fin = true;
         _seqno_with_fin = _next_seqno;
     }
+    // - set the payload
     payload_length_to_send = min(payload_length_to_send, _stream.buffer_size());
-    if (payload_length_to_send != 0) {
-        // fill the payload
-        string str_to_send = _stream.read(payload_length_to_send);
-        seg.payload() = move(str_to_send);
-        size_t length_to_send = payload_length_to_send + (seg.header().fin ? 1 : 0);
+    string str_to_send = _stream.read(payload_length_to_send);
+    seg.payload() = move(str_to_send);
+    
+    size_t length_to_send = payload_length_to_send + (seg.header().syn ? 1 : 0) + (seg.header().fin ? 1 : 0);
+    
+    if (length_to_send != 0) {
         // sent the segment
         _segments_out.push(seg);
         // tag that this segment is in flight
@@ -115,6 +109,7 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
         _consecutive_retransmission = 0;
     }
 
+    fill_window();
     return {true};
 }
 
