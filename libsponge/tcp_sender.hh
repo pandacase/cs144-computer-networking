@@ -27,6 +27,9 @@ class TCPSender {
     //! add some private variable here:
     std::map<uint64_t, TCPSegment> _segments_in_flight{}; 
     uint64_t _bytes_in_flight{0};
+    bool _syn_sent{false};
+    bool _fin_sent{false};
+    bool _fin_received{false};
     
     unsigned int _current_retransmission_timeout;
     bool _timer_on{false};  //!< the switch indicating if the timer is on
