@@ -36,6 +36,10 @@ TCPSender::TCPSender(const size_t capacity, const uint16_t retx_timeout, const s
 uint64_t TCPSender::bytes_in_flight() const { return {_bytes_in_flight}; }
 
 void TCPSender::fill_window() {
+    if (_fin_sent) {
+        return;
+    }
+
     // while `first time come in` or `win > 0`:
     while (!_syn_sent || _receiver_window_size > 0) {
         TCPSegment seg = TCPSegment();
@@ -52,14 +56,14 @@ void TCPSender::fill_window() {
         payload_length_to_send = min(payload_length_to_send, _stream.buffer_size());
         string str_to_send = _stream.read(payload_length_to_send);
         seg.payload() = move(str_to_send);
-        size_t length_to_send = seg.length_in_sequence_space();
         // - set the fin
-        if (_stream.eof() && length_to_send < _receiver_window_size) { 
+        if (_stream.eof() && seg.length_in_sequence_space() < _receiver_window_size) { 
             seg.header().fin = true;    // why `<` but not `<=` ?
             _fin_sent = true;           // `fin` is about to be set.
         }
-        
-        if (length_to_send != 0) {
+
+        size_t length_to_send = seg.length_in_sequence_space();
+        if (length_to_send > 0) {
             // sent the segment
             _segments_out.push(seg);
             // tag that this segment is in flight
@@ -89,7 +93,7 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
     } else if (!_syn_sent) {
         return {false};
     } else if (_fin_received) {
-        return {true};
+        return {false};
     }
     
     if (absolute_ackno >= _acked) {
@@ -115,9 +119,6 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
             _timer_on = true;
         } else {
             _timer_on = false;
-            if (_syn_sent) {
-                _syn_received = true;
-            }
             if (_fin_sent) {
                 _fin_received = true;
             }
