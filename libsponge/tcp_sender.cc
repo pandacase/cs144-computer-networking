@@ -116,6 +116,9 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
             _timer_on = true;
         } else {
             _timer_on = false;
+            if (_syn_sent) {
+                _syn_received = true;
+            }
             if (_fin_sent) {
                 _fin_received = true;
             }
