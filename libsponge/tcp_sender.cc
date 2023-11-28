@@ -36,40 +36,49 @@ TCPSender::TCPSender(const size_t capacity, const uint16_t retx_timeout, const s
 uint64_t TCPSender::bytes_in_flight() const { return {_bytes_in_flight}; }
 
 void TCPSender::fill_window() {
-    TCPSegment seg = TCPSegment();
-    
-    // Construct the segment
-    seg.header().seqno = wrap(_next_seqno, _isn);
-    // - set the syn
-    if (_next_seqno == 0) {
-        seg.header().syn = true;
+    // while `first time come in` or `win > 0`:
+    while (_next_seqno == 0 || _receiver_window_size > 0) {
+        TCPSegment seg = TCPSegment();
 
+        // Construct the segment
+        seg.header().seqno = wrap(_next_seqno, _isn);
+        // - set the syn
+        if (_next_seqno == 0) {
+            seg.header().syn = true;
+            _syn_sent = true;
+        }
+        size_t payload_length_to_send = min(TCPConfig::MAX_PAYLOAD_SIZE, size_t(_receiver_window_size));
+        // - set the payload
+        payload_length_to_send = min(payload_length_to_send, _stream.buffer_size());
+        string str_to_send = _stream.read(payload_length_to_send);
+        seg.payload() = move(str_to_send);
+        size_t length_to_send = seg.length_in_sequence_space();
+        // - set the fin
+        if (_stream.eof() && length_to_send < _receiver_window_size) { 
+            seg.header().fin = true;    // why `<` but not `<=` ?
+            _fin_sent = true;           // `fin` is about to be set.
+        }
+        
+        
+        if (length_to_send != 0) {
+            // sent the segment
+            _segments_out.push(seg);
+            // tag that this segment is in flight
+            _segments_in_flight[_next_seqno] = seg;
+            _bytes_in_flight += length_to_send;
+            // update the next byte to be sent and the window size
+            _next_seqno += length_to_send;
+            _receiver_window_size -= length_to_send;
+            // trun on the timer
+            _timer_on = true;
+        }
+        
+        // if no more 
+        if (_stream.buffer_size() == 0) {
+            break;
+        }
     }
-    size_t payload_length_to_send = min(TCPConfig::MAX_PAYLOAD_SIZE, size_t(_receiver_window_size));
-    // - set the fin
-    if (_stream.eof() && payload_length_to_send >= _stream.buffer_size()) {
-        seg.header().fin = true;
-        _seqno_with_fin = _next_seqno;
-    }
-    // - set the payload
-    payload_length_to_send = min(payload_length_to_send, _stream.buffer_size());
-    string str_to_send = _stream.read(payload_length_to_send);
-    seg.payload() = move(str_to_send);
     
-    size_t length_to_send = payload_length_to_send + (seg.header().syn ? 1 : 0) + (seg.header().fin ? 1 : 0);
-    
-    if (length_to_send != 0) {
-        // sent the segment
-        _segments_out.push(seg);
-        // tag that this segment is in flight
-        _segments_in_flight[_next_seqno] = seg;
-        _bytes_in_flight += length_to_send;
-        // update the next byte to be sent and the window size
-        _next_seqno += length_to_send;
-        _receiver_window_size -= length_to_send;
-        // trun on the timer
-        _timer_on = true;
-    }
 }
 
 //! \param ackno The remote receiver's ackno (acknowledgment number)
@@ -79,6 +88,10 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
     uint64_t absolute_ackno = unwrap(ackno, _isn, _acked);
     if (absolute_ackno > _next_seqno) {
         return {false};
+    } else if (!_syn_sent) {
+        return {false};
+    } else if (_fin_received) {
+        return {true};
     }
     
     if (absolute_ackno >= _acked) {
@@ -104,6 +117,9 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
             _timer_on = true;
         } else {
             _timer_on = false;
+            if (_fin_sent) {
+                _fin_received = true;
+            }
         }
         // reset the consecutive retransmission
         _consecutive_retransmission = 0;
