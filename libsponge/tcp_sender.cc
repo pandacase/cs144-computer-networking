@@ -37,7 +37,7 @@ uint64_t TCPSender::bytes_in_flight() const { return {_bytes_in_flight}; }
 
 void TCPSender::fill_window() {
     // while `first time come in` or `win > 0`:
-    while (_next_seqno == 0 || _receiver_window_size > 0) {
+    while (!_syn_sent || _receiver_window_size > 0) {
         TCPSegment seg = TCPSegment();
 
         // Construct the segment
@@ -78,7 +78,6 @@ void TCPSender::fill_window() {
             break;
         }
     }
-    
 }
 
 //! \param ackno The remote receiver's ackno (acknowledgment number)
