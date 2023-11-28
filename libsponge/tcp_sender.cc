@@ -59,7 +59,6 @@ void TCPSender::fill_window() {
             _fin_sent = true;           // `fin` is about to be set.
         }
         
-        
         if (length_to_send != 0) {
             // sent the segment
             _segments_out.push(seg);
