@@ -36,9 +36,7 @@ TCPSender::TCPSender(const size_t capacity, const uint16_t retx_timeout, const s
 uint64_t TCPSender::bytes_in_flight() const { return {_bytes_in_flight}; }
 
 void TCPSender::fill_window() {
-    if (_syn_sent && !_syn_received) {
-        return;
-    } if (_fin_sent) {
+    if (_fin_sent) {
         return;
     }
 
@@ -49,7 +47,7 @@ void TCPSender::fill_window() {
         // Construct the segment
         seg.header().seqno = wrap(_next_seqno, _isn);
         // - set the syn
-        if (_next_seqno == 0) {
+        if (_next_seqno == 0 && !_syn_sent) {
             seg.header().syn = true;
             _syn_sent = true;
         }
@@ -149,14 +147,15 @@ void TCPSender::tick(const size_t ms_since_last_tick) {
                 _segments_out.push(first_segment->second);
             }
 
-            if (_receiver_window_size != 0) {
+            if (_receiver_window_size > 0 || _segments_in_flight.begin()->second.header().syn) {
                 // keep track of the number of consecutive retransmissions:
                 _consecutive_retransmission += 1;
-                // Double the RTO:
+                // double the RTO:
                 _current_retransmission_timeout *= 2;
-                // start the retransmission timer:
-                _timer = 0;
             }
+            
+            // start the retransmission timer:
+            _timer = 0;
         }
     }
 }
