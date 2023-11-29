@@ -36,7 +36,9 @@ TCPSender::TCPSender(const size_t capacity, const uint16_t retx_timeout, const s
 uint64_t TCPSender::bytes_in_flight() const { return {_bytes_in_flight}; }
 
 void TCPSender::fill_window() {
-    if (_fin_sent) {
+    if (_syn_sent && !_syn_received) {
+        return;
+    } if (_fin_sent) {
         return;
     }
 
@@ -119,7 +121,9 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
             _timer_on = true;
         } else {
             _timer_on = false;
-            if (_fin_sent) {
+            if (_syn_sent) {
+                _syn_received = true;
+            } if (_fin_sent) {
                 _fin_received = true;
             }
         }

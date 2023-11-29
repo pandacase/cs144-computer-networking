@@ -28,6 +28,7 @@ class TCPSender {
     std::map<uint64_t, TCPSegment> _segments_in_flight{}; 
     uint64_t _bytes_in_flight{0};
     bool _syn_sent{false};
+    bool _syn_received{false};
     bool _fin_sent{false};
     bool _fin_received{false};
     
@@ -36,7 +37,7 @@ class TCPSender {
     unsigned int _timer{0}; //!< the timer recording if the previous segment expires
     unsigned int _consecutive_retransmission{0};
     uint64_t _acked{0}; //!< the ack number receive from receiver currently
-    uint16_t _receiver_window_size{0};
+    uint16_t _receiver_window_size{1};
 
   public:
     //! Initialize a TCPSender
