@@ -56,7 +56,7 @@ void TCPSender::fill_window() {
             TCPConfig::MAX_PAYLOAD_SIZE, 
             size_t(_receiver_window_size - (seg.header().syn ? 1 : 0)), 
             _stream.buffer_size()
-            });
+        });
         string str_to_send = _stream.read(payload_length_to_send);
         seg.payload() = move(str_to_send);
         // - set the fin
