@@ -44,7 +44,7 @@ Updating:
   - add `libsponge/tcp_sender.cc`
 - [ ] lab4
 - [ ] lab5
-- [ ] lab7
+- [ ] lab6
 
 ## More details
 
