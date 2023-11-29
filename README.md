@@ -39,7 +39,7 @@ Updating:
   - update `libsponge/stream_reassembler.cc`
   - add `libsponge/wrapping_integers.hh`
   - add `libsponge/wrapping_integers.cc`
-- [ ] lab3
+- [x] lab3
   - add `libsponge/tcp_sender.hh`
   - add `libsponge/tcp_sender.cc`
 - [ ] lab4
