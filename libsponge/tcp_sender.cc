@@ -51,9 +51,12 @@ void TCPSender::fill_window() {
             seg.header().syn = true;
             _syn_sent = true;
         }
-        size_t payload_length_to_send = min(TCPConfig::MAX_PAYLOAD_SIZE, size_t(_receiver_window_size));
         // - set the payload
-        payload_length_to_send = min(payload_length_to_send, _stream.buffer_size());
+        size_t payload_length_to_send = min({
+            TCPConfig::MAX_PAYLOAD_SIZE, 
+            size_t(_receiver_window_size - (seg.header().syn ? 1 : 0)), 
+            _stream.buffer_size()
+            });
         string str_to_send = _stream.read(payload_length_to_send);
         seg.payload() = move(str_to_send);
         // - set the fin
