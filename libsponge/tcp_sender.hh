@@ -25,7 +25,7 @@ class TCPSender {
     uint64_t _next_seqno{0}; //!< the (absolute) sequence number for the next byte to be sent
 
     //! add some private variable here:
-    std::map<uint64_t, TCPSegment> _segments_in_flight{}; 
+    std::queue<TCPSegment> _segments_in_flight{}; 
     uint64_t _bytes_in_flight{0};
     bool _syn_sent{false};
     bool _syn_received{false};

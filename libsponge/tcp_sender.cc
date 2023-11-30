@@ -70,7 +70,7 @@ void TCPSender::fill_window() {
             // sent the segment
             _segments_out.push(seg);
             // tag that this segment is in flight
-            _segments_in_flight[_next_seqno] = seg;
+            _segments_in_flight.push(seg);
             _bytes_in_flight += length_to_send;
             // update the next byte to be sent and the window size
             _next_seqno += length_to_send;
@@ -103,12 +103,11 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
         _acked = absolute_ackno;
         _receiver_window_size = window_size;
         // update the segments in flight
-        auto it = _segments_in_flight.begin();
-        while(it != _segments_in_flight.end()) {
-            if (it->first < absolute_ackno) {
-                // removed from the segments in flight
-                _bytes_in_flight -= it->second.length_in_sequence_space();
-                it = _segments_in_flight.erase(it);
+        while(!_segments_in_flight.empty()) {
+            uint64_t seg_seqno = unwrap(_segments_in_flight.front().header().seqno, _isn, _acked);
+            if (seg_seqno < absolute_ackno) {
+                _bytes_in_flight -= _segments_in_flight.front().length_in_sequence_space();
+                _segments_in_flight.pop();
             } else {
                 break;
             }
@@ -146,11 +145,10 @@ void TCPSender::tick(const size_t ms_since_last_tick) {
         if (_timer >= _current_retransmission_timeout) { 
             // retransmission
             if (!_segments_in_flight.empty()) {
-                auto first_segment = _segments_in_flight.begin();
-                _segments_out.push(first_segment->second);
+                _segments_out.push(_segments_in_flight.front());
             }
 
-            if (_receiver_window_size > 0 || _segments_in_flight.begin()->second.header().syn) {
+            if (_receiver_window_size > 0 || _segments_in_flight.front().header().syn) {
                 // keep track of the number of consecutive retransmissions:
                 _consecutive_retransmission += 1;
                 // double the RTO:
