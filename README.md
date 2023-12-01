@@ -18,7 +18,7 @@ From [csdiy](https://csdiy.wiki/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/CS
 
 So it is more easy to solve the envir problem when i choose this version as the project.
 
-And also most of the solution on the internet is about `sponge` _(But...anyway, just try to finsh the challenge completely by yourself.)_
+And also most of the solution on the internet is about `sponge`
 
 ## About solution
 
