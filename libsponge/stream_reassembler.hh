@@ -7,8 +7,8 @@
 #include <string>
 #include <map>
 
-//! \brief A class that assembles a series of excerpts from a byte stream (possibly out of order,
-//! possibly overlapping) into an in-order byte stream.
+//! \brief A class that assembles a series of excerpts from a byte stream (possibly out 
+//! of order, possibly overlapping) into an in-order byte stream.
 class StreamReassembler {
   private:
     // Your code here -- add private members as necessary.
@@ -47,17 +47,18 @@ class StreamReassembler {
     //!
     //! \note If the byte at a particular index has been submitted twice, it
     //! should only be counted once for the purpose of this function.
-    size_t unassembled_bytes() const;
+    size_t unassembled_bytes() const { return _unassembled_bytes; }
 
     //! \brief Is the internal state empty (other than the output stream)?
     //! \returns `true` if no substrings are waiting to be assembled
-    bool empty() const;
+    bool empty() const { return _segments.empty(); }
 
     //! @brief The next index the stream is waiting for
     size_t next_unassembled() const { return _next_unassembled; }
 
   private:
-      //! @brief An aux func of [StreamReassembler::push_substring] : write a sub string into _output stream
+      //! @brief An aux func of [StreamReassembler::push_substring] : 
+      //! write a sub string into _output stream
       //! 
       //! @param _output The output byte stream
       //! @param _next_unassembled The next unassembled byte index
@@ -65,15 +66,26 @@ class StreamReassembler {
       //! @param index The index of first byte of data
       //! @return true if successfully write
       //! @return false (else)
-      bool write_substring(ByteStream &output, size_t &next_unassembled, const std::string &data, const size_t index);
+      bool write_substring(
+        ByteStream &output, 
+        size_t &next_unassembled, 
+        const std::string &data, 
+        const size_t index
+      );
 
-      //! @brief An aux func of [StreamReassembler::push_substring] : Add a string into _segments set
+      //! @brief An aux func of [StreamReassembler::push_substring] : Add a string into 
+      //! _segments set
       //! 
       //! @param _segments The set of all string that are unable to write yet (unassembled)
       //! @param _unassembled_bytes The number of unassembled bytes
       //! @param data The new input string
       //! @param index The index of first byte of data
-      void add_and_merge_unassembled_bytes(std::map<size_t, std::string> &segments, size_t &unassembled_bytes, const std::string &data, const size_t index);
+      void add_and_merge_unassembled_bytes(
+        std::map<size_t, std::string> &segments, 
+        size_t &unassembled_bytes, 
+        const std::string &data, 
+        const size_t index
+      );
 };
 
 #endif  // SPONGE_LIBSPONGE_STREAM_REASSEMBLER_HH
