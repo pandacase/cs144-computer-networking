@@ -22,7 +22,7 @@ class TCPReceiver {
 
     bool _syn_flag; //!< be set to TURE after receiving SYN
     bool _fin_flag; //!< be set to TURE after receiving FIN
-    WrappingInt32 _isn;    //!< 
+    WrappingInt32 _sender_isn;    //!< 
 
   public:
     //! \brief Construct a TCP receiver
@@ -51,7 +51,7 @@ class TCPReceiver {
     //! the first byte that falls after the window (and will not be
     //! accepted by the receiver) and (b) the sequence number of the
     //! beginning of the window (the ackno).
-    size_t window_size() const;
+    size_t window_size() const { return {stream_out().remaining_capacity()}; };
     //!@}
 
     //! \brief number of bytes stored but not yet reassembled
