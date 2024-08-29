@@ -63,9 +63,15 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
   // checkpoint can be used for conversion: uint32 -> uint64
   uint64_t index = unwrap(seg.header().seqno, _sender_isn, checkpoint) - 1;
   uint64_t real_index = max(checkpoint, index);
+
+  // // Apply the rule that if window size is zero, treat it as one byte.
+  // size_t win_size = window_size() == 0 ? 1 : window_size();
+
   int length = seg.length_in_sequence_space() 
               - (seg.header().syn ? 1 : 0) 
               - (seg.header().fin ? 1 : 0);
+  // // Apply the rule that if segment length is zero, treat it as one byte.
+  // length = length == 0 ? 1 : length;
   int real_length = min(index + length, checkpoint + window_size()) - real_index;
   
   // push substring
