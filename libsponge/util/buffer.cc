@@ -35,7 +35,7 @@ string BufferList::concatenate() const {
     std::string ret;
     ret.reserve(size());
     for (const auto &buf : _buffers) {
-        ret.append(buf);
+        ret.append(static_cast<std::string_view>(buf));
     }
     return ret;
 }
