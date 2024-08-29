@@ -42,22 +42,27 @@ void TCPSender::fill_window() {
   if (_fin_sent) {
     return;
   }
+  
+  // send a syn first
+  if (!_syn_sent) {
+    TCPSegment seg;
+    seg.header().seqno = wrap(_next_seqno, _isn);
+    seg.header().syn = true;
+    send_segment(seg);
+    _syn_sent = true;
+    return;
+  }
 
   // while `first time come in` or `win > 0`:
-  while (!_syn_sent || _receiver_window_size > 0) {
+  while (_receiver_window_size > 0) {
     TCPSegment seg = TCPSegment();
 
     // Construct the segment
     seg.header().seqno = wrap(_next_seqno, _isn);
-    // - set the syn
-    if (_next_seqno == 0 && !_syn_sent) {
-      seg.header().syn = true;
-      _syn_sent = true;
-    }
     // - set the payload
     size_t payload_length_to_send = min({
       TCPConfig::MAX_PAYLOAD_SIZE, 
-      size_t(_receiver_window_size - (seg.header().syn ? 1 : 0)), 
+      size_t(_receiver_window_size), 
       _stream.buffer_size()
     });
     seg.payload() = move(_stream.read(payload_length_to_send));
@@ -66,21 +71,9 @@ void TCPSender::fill_window() {
       seg.header().fin = true;    // why `<` but not `<=` ?
       _fin_sent = true;           // `fin` is about to be set.
     }
-
-    size_t length_to_send = seg.length_in_sequence_space();
-    if (length_to_send > 0) {
-      // sent the segment
-      _segments_out.push(seg);
-      // tag that this segment is in flight
-      _segments_in_flight.push(seg);
-      _bytes_in_flight += length_to_send;
-      // update the next byte to be sent and the window size
-      _next_seqno += length_to_send;
-      _receiver_window_size -= length_to_send;
-      // trun on the timer
-      _timer_on = true;
-    }
     
+    send_segment(seg);
+
     // if no more 
     if (_stream.buffer_size() == 0) {
       break;
@@ -171,4 +164,20 @@ void TCPSender::send_empty_segment() {
   TCPSegment seg = TCPSegment();
   seg.header().seqno = wrap(_next_seqno, _isn);
   _segments_out.push(seg);
+}
+
+void TCPSender::send_segment(const TCPSegment& seg) {
+  size_t length_to_send = seg.length_in_sequence_space();
+  if (length_to_send > 0) {
+    // sent the segment
+    _segments_out.push(seg);
+    // tag that this segment is in flight
+    _segments_in_flight.push(seg);
+    _bytes_in_flight += length_to_send;
+    // update the next byte to be sent and the window size
+    _next_seqno += length_to_send;
+    _receiver_window_size -= length_to_send;
+    // trun on the timer
+    _timer_on = true;
+  }
 }
