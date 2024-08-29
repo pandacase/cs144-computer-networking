@@ -22,7 +22,7 @@ And also most of the solution on the internet is about `sponge`
 
 ## About solution
 
-solutions are all in `apps/` and `libsponge/`
+solutions are all in `apps/` and `libsponge/`, this repo only includes the TCP implementation part.
 
 Updating:
 - [x] lab0
@@ -43,11 +43,14 @@ Updating:
   - add `libsponge/tcp_sender.hh`
   - add `libsponge/tcp_sender.cc`
 - [ ] lab4
-- [ ] lab5
-- [ ] lab6
+  - add `libsponge/tcp_connection.hh`
+  - add `libsponge/tcp_connection.cc`
+
 
 ## More details
 
+- install `libpcap-dev` from apt if needed.
+- add `#include <stdexcept>` in `/libsponge/util/buffer.hh` if needed.
+- add permission for `/tests/webget_t.sh` if needed
 - i use `doxygen` to generate comments.
-
-- for debugging u can view the source code in `tests/`
+- for debugging u can view the source code in `tests/`.
