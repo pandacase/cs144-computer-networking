@@ -73,10 +73,10 @@ class TCPSender {
     //! \brief How many sequence numbers are occupied by segments sent but not yet acknowledged?
     //! \note count is in "sequence space," i.e. SYN and FIN each count for one byte
     //! (see TCPSegment::length_in_sequence_space())
-    size_t bytes_in_flight() const;
+    size_t bytes_in_flight() const { return {_bytes_in_flight}; }
 
     //! \brief Number of consecutive retransmissions that have occurred in a row
-    unsigned int consecutive_retransmissions() const;
+    unsigned int consecutive_retransmissions() const { return {_consecutive_retransmission}; }
 
     //! \brief TCPSegments that the TCPSender has enqueued for transmission.
     //! \note These must be dequeued and sent by the TCPConnection,
