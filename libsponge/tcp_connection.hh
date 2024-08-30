@@ -23,17 +23,30 @@ class TCPConnection {
 
     //! added private members
     size_t _time_since_last_segment_received{0};
-    bool _active{false}; //!< 
-    bool _need_send_rst{false};
-    bool _ack_for_fin_sent{false};
+    bool _active{true};
 
-    //! added helper function
-    bool push_segments_out(bool send_syn = false);
-    void unclean_shutdown(bool send_rst);
-    bool clean_shutdown();
-    bool in_listen();
-    bool in_syn_recv();
-    bool in_syn_sent();
+    
+    //! @brief pop segments from _sender, push into this->_segments_out
+    //! 
+    //! @return true if sent at least one segment
+    //! @return false if sent no segment
+    bool send_pending_segments();
+
+    //! @brief Set the ack and window size for a segment
+    //! 
+    //! @param seg the segment to be set
+    void set_ack_and_win(TCPSegment& seg);
+
+    //! @brief 
+    //! 
+    void send_rst();
+    // prereqs1 : The inbound stream has been fully assembled and has ended.
+    bool check_inbound_ended();
+    // prereqs2 : The outbound stream has been ended by the local application and fully 
+    // sent (includingthe fact that it ended, i.e. a segment with fin ) to the remote peer.
+    // prereqs3 : The outbound stream has been fully acknowledged by the remote peer.
+    bool check_outbound_ended();
+
 
   public:
     //! @name "Input" interface for the writer
