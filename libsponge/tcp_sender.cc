@@ -129,7 +129,7 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
     _consecutive_retransmission = 0;
   }
 
-  // fill_window();
+  fill_window();
   return {true};
 }
 
